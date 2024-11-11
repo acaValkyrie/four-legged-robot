@@ -1,101 +1,33 @@
+// Found a new device asynchronously: Name: Joy-Con (R), Address: 98:b6:e9:89:8a:34, cod: 0x002508, rssi: -72
+// Found a new device asynchronously: Name: Lic Pro Controller, Address: 30:31:7d:80:19:52, cod: 0x002508, rssi: -56
 #include <Arduino.h>
-#include <Servo.h>
-#include <BLEDevice.h>
+#include <BluetoothSerial.h>
+BluetoothSerial SerialBT;
+// uint8_t address[6] = {0x98, 0xb6, 0xe9, 0x89, 0x8a, 0x34};
+uint8_t address[6] = {0x30, 0x31, 0x7d, 0x80, 0x19, 0x52};
+const char* pin = "0000";
 
-#define Joycon_address "98:B6:E9:89:8A:34"
-// 検索するBLEデバイス。serviceUUIDを調べる場合には空にする(例はHuman Interface Device"00001812-0000-1000-8000-00805f9b34fb")
-static BLEUUID serviceUUID("");
-static BLEAdvertisedDevice* myDevice;
-// 接続してCharacteristic一覧を取得
-bool connectToServer() {
-  USBSerial.print("接続先 : ");
-  USBSerial.println(myDevice->getAddress().toString().c_str());
-  BLEClient*  pClient  = BLEDevice::createClient();
-  pClient->connect(myDevice);
-  // サービス取得
-  BLERemoteService* pRemoteService = pClient->getService(serviceUUID);
-  if (pRemoteService == nullptr) {
-    pClient->disconnect();
-    return false;
+void setup(){
+  Serial.begin(115200);
+  
+  if(!SerialBT.begin("ESP32", true)){
+    Serial.println("An error occurred initializing Bluetooth");
+    return;
   }
-  // Characteristic一覧
-  USBSerial.println("characteristic一覧");
-  std::map<std::string, BLERemoteCharacteristic*>* mapCharacteristics = pRemoteService->getCharacteristics();
-  for (std::map<std::string, BLERemoteCharacteristic*>::iterator i = mapCharacteristics->begin(); i != mapCharacteristics->end(); ++i) {
-    USBSerial.print(" - characteristic UUID : ");
-    USBSerial.print(i->first.c_str());
-    USBSerial.print(" Broadcast:");
-    USBSerial.print(i->second->canBroadcast()?'O':'X');
-    USBSerial.print(" Read:");
-    USBSerial.print(i->second->canRead()?'O':'X');
-    USBSerial.print(" WriteNoResponse:");
-    USBSerial.print(i->second->canWriteNoResponse()?'O':'X');
-    USBSerial.print(" Write:");
-    USBSerial.print(i->second->canWrite()?'O':'X');
-    USBSerial.print(" Notify:");
-    USBSerial.print(i->second->canNotify()?'O':'X');
-    USBSerial.print(" Indicate:");
-    USBSerial.print(i->second->canIndicate()?'O':'X');
-    USBSerial.println();
+  SerialBT.setPin(pin);
+  delay(1000);
+  if(SerialBT.connect(address)){
+    Serial.println("Connected to Joy-Con (R)");
+  } else {
+    Serial.println("Couldn't connect to Joy-Con (R)");
   }
-  // stop
-  USBSerial.println("プログラム停止!");
-  while (1) delay(1000);
-}
-// 検索したデバイスを受信するコールバック関数
-class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
-    void onResult(BLEAdvertisedDevice advertisedDevice) {
-      USBSerial.print("BLE デバイス発見 : ");
-      USBSerial.println(advertisedDevice.toString().c_str());
-      if (advertisedDevice.haveServiceUUID() && advertisedDevice.isAdvertisingService(serviceUUID)) {
-        // 指定デバイスだったら接続する
-        BLEDevice::getScan()->stop();
-        myDevice = new BLEAdvertisedDevice(advertisedDevice);
-      }
-    }
-};
-
-const int servoNum = 4;
-const int servoPins[servoNum] = {5, 6, 7, 1};
-Servo servos[servoNum];
-
-void setup() {
-    // Serial.begin(115200);
-    USBSerial.begin(9600);
-
-    delay(1000);
-
-    BLEDevice::init("");
-    BLEScan* pBLEScan = BLEDevice::getScan();
-    pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
-    pBLEScan->setInterval(1349);
-    pBLEScan->setWindow(449);
-    pBLEScan->setActiveScan(true);
-    pBLEScan->start(5, false);
-
-    // for(int i = 0; i < servoNum; i++){
-    //     pinMode(servoPins[i], OUTPUT);
-    //     servos[i].attach(servoPins[i], 853, 2090);
-    //     servos[i].write(servoPins[i], 90);
-    // }
-    // delay(500);
-    // Serial.print("bluetooth_connected\n");
-}
-
-void f(int index, int degree){
-    servos[index].write(servoPins[index], degree);
-    delay(100);
 }
 
 void loop(){
-    if (myDevice != NULL) {
-        connectToServer();
-    }
-    delay(1000);
-    // int delta = 60;
-    // for(int i = 0; i < servoNum; i++) f(i, 90-delta);
-    // for(int i = 0; i < servoNum; i++) f(i, 90);
-    // for(int i = 0; i < servoNum; i++) f(i, 90+delta);
-    // for(int i = 0; i < servoNum; i++) f(i, 90);
+  if(SerialBT.available()){
+    Serial.write(SerialBT.read());
+  }
+  if(Serial.available()){
+    SerialBT.write(Serial.read());
+  }
 }
-
