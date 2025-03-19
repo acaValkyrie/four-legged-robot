@@ -4,6 +4,8 @@
 void setup() {
   Serial.begin(115200);
   Serial.println("Starting Arduino BLE Client application...");
+  pinMode(ledPin, OUTPUT);
+  
   BLEDevice::init("");
 
   // Retrieve a Scanner and set the callback we want to use to be informed when we

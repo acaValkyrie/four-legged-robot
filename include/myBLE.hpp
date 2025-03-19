@@ -19,6 +19,7 @@ static boolean connected = false;
 static boolean doScan = false;
 static BLERemoteCharacteristic *pRemoteCharacteristic;
 static BLEAdvertisedDevice *myDevice;
+const int ledPin = 17;
 
 static void notifyCallback(BLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify) {
   Serial.print("Notify callback for characteristic ");
@@ -36,6 +37,7 @@ class MyClientCallback : public BLEClientCallbacks {
   void onDisconnect(BLEClient *pclient) {
     connected = false;
     Serial.println("onDisconnect");
+    digitalWrite(ledPin, LOW);
   }
 };
  
@@ -51,6 +53,7 @@ bool connectToServer() {
   // Connect to the remove BLE Server.
   pClient->connect(myDevice);  // if you pass BLEAdvertisedDevice instead of address, it will be recognized type of peer device address (public or private)
   Serial.println(" - Connected to server");
+  digitalWrite(ledPin, HIGH);
   pClient->setMTU(517);  //set client to request maximum MTU from server (default is 23 otherwise)
 
   // Obtain a reference to the service we are after in the remote BLE server.
