@@ -1,3 +1,4 @@
+#pragma once
 /**
  * A BLE client example that is rich in capabilities.
  * There is a lot new capabilities implemented.
@@ -13,10 +14,6 @@
 static BLEUUID HIDserviceUUID((uint16_t)0x1812);
 // The characteristic of the remote service we are interested in.
 static BLEUUID ReportCharUUID("00002A4D-0000-1000-8000-00805F9B34FB");
-// static BLEUUID ReportCharUUID("00002A33-0000-1000-8000-00805F9B34FB");
-// static BLEUUID ReportCharUUID("00002A4B-0000-1000-8000-00805F9B34FB");
-// static BLEUUID ReportCharUUID("00002A4A-0000-1000-8000-00805F9B34FB");
-// static BLEUUID ReportCharUUID("00002A4C-0000-1000-8000-00805F9B34FB");
 
 static boolean doConnect = false;
 static boolean connected = false;
@@ -25,15 +22,27 @@ static BLERemoteCharacteristic *pRemoteCharacteristic;
 static BLEAdvertisedDevice *myDevice;
 const int BLEConnectIndicatorLEDPin = 17;
 #define TARGET_DEVICE_NAME "VR-PARK"
+static int stick_x = 0;
+static int stick_y = 0;
 
 static void notifyCallback(BLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify) {
-  Serial.print("Notify callback for characteristic ");
-  Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
-  Serial.print(" of data length ");
-  Serial.println(length);
-  Serial.print("data: ");
-  Serial.write(pData, length);
-  Serial.println();
+  const int joy_x_index = 1;
+  const int joy_y_index = 2;
+  int x = pData[joy_x_index];
+  int y = pData[joy_y_index];
+  const int X_RIGHT = 15;  // 0000 1111
+  const int X_LEFT  = 239; // 1110 1111
+  const int Y_UP    = 239; // 1110 1111
+  const int Y_DOWN  = 15;  // 0000 1111
+  
+  if(x == X_RIGHT) stick_x = 1;
+  else if(x == X_LEFT) stick_x = -1;
+  else stick_x = 0;
+
+  if(y == Y_UP) stick_y = 1;
+  else if(y == Y_DOWN) stick_y = -1;
+  else stick_y = 0;
+  Serial.printf("x: %d, y: %d\n", stick_x, stick_y);
 }
 
 class MyClientCallback : public BLEClientCallbacks {
