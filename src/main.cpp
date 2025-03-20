@@ -4,7 +4,7 @@
 void setup() {
   Serial.begin(115200);
   Serial.println("Starting Arduino BLE Client application...");
-  pinMode(ledPin, OUTPUT);
+  pinMode(BLEConnectIndicatorLEDPin, OUTPUT);
   
   BLEDevice::init("");
 
