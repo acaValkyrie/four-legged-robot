@@ -46,30 +46,48 @@ void BLETask(void *arg){
     // If we are connected to a peer BLE Server, update the characteristic each time we are reached
     // with the current time since boot.
     if (connected) {
-
-      // Set the characteristic's value to be the array of bytes that is actually a string.
-      
-
     } else if (doScan) {
       BLEDevice::getScan()->start(0);  // this is just example to start scan after disconnect, most likely there is better way to do it in arduino
     }
 
-    delay(1000);  // Delay a second between loops.
+    delay(100);  // Delay a second between loops.
   }
 }
 
-int angle = 0;
-int angleStep = 10;
 void servoTask(void *arg){
+  enum state{
+    FORWARD,
+    FORWARD_RIGHT,
+    RIGHT,
+    BACKWARD_RIGHT,
+    BACKWARD,
+    BACKWARD_LEFT,
+    LEFT,
+    FORWARD_LEFT,
+    STOP
+  };
+  state currentState = STOP;
+
+  int theta = 0;
+  const int thetaStep = 10;
   while(1){
-    if(stick_y == 1){
-      angle += angleStep;
-      if(angle > 90) angle = 90;
+    if (stick_y == 1){
+      theta+=thetaStep;
     }else if(stick_y == -1){
-      angle -= angleStep;
-      if(angle < -90) angle = -90;
+      theta-=thetaStep;
     }
-    setServoAngle(FRONT_RIGHT, angle);
+    int arm_amp = 60;
+    for(ServoType type = FRONT_LEFT; type <= BACK_RIGHT; type = (ServoType)(type+1)){
+      int phi = 0;
+      if (type == FRONT_LEFT || type == BACK_RIGHT){
+        phi = 180;
+      }
+      int angle = arm_amp*sin(theta*PI/180 + phi*PI/180);
+      setServoAngle(type, angle);
+    }
+    int waist_amp = 30;
+    int angle = waist_amp*sin(theta*PI/180 + 180*PI/180);
+    setServoAngle(WAIST, angle);
     delay(100);
   }
 }
