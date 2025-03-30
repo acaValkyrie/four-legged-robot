@@ -76,6 +76,11 @@ void servoTask(void *arg){
     }else if(stick_y == -1){
       theta-=thetaStep;
     }
+    if (theta > 360){
+      theta -= 360;
+    }else if(theta < 0){
+      theta += 360;
+    }
     int arm_amp = 60;
     for(ServoType type = FRONT_LEFT; type <= BACK_RIGHT; type = (ServoType)(type+1)){
       int phi = 0;
@@ -88,6 +93,6 @@ void servoTask(void *arg){
     int waist_amp = 30;
     int angle = waist_amp*sin(theta*PI/180 + 180*PI/180);
     setServoAngle(WAIST, angle);
-    delay(100);
+    delay(thetaStep * 10);
   }
 }
