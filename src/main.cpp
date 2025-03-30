@@ -71,23 +71,51 @@ void servoTask(void *arg){
   int theta = 0;
   const int thetaStep = 10;
   while(1){
-    if (stick_y == 1){
+    if (stick_y != 0 || stick_x != 0){
       theta+=thetaStep;
-    }else if(stick_y == -1){
-      theta-=thetaStep;
     }
     if (theta > 360){
       theta -= 360;
     }else if(theta < 0){
       theta += 360;
     }
-    int arm_amp = 60;
+
     for(ServoType type = FRONT_LEFT; type <= BACK_RIGHT; type = (ServoType)(type+1)){
       int phi = 0;
+      int arm_amp = 30;
+      int angle_center;
+      if(stick_x == 1 && (type == FRONT_RIGHT || type == BACK_RIGHT)){
+        arm_amp *= 0.5;
+      }else if(stick_x == -1 && (type == FRONT_LEFT || type == BACK_LEFT)){
+        arm_amp *= 0.5;
+      }
+      if(stick_x == 1 && stick_y == 0 && type == BACK_RIGHT){
+        arm_amp = 0;
+      }
+      if(stick_x == -1 && stick_y == 0 && type == BACK_LEFT){
+        arm_amp = 0;
+      }
       if (type == FRONT_LEFT || type == BACK_RIGHT){
         phi = 180;
       }
-      int angle = arm_amp*sin(theta*PI/180 + phi*PI/180);
+      if(stick_y == 1){ 
+        if(type == FRONT_LEFT || type == FRONT_RIGHT){
+          // arm_amp *= 0.5;
+          angle_center = -15;
+        }else if(type == BACK_LEFT || type == BACK_RIGHT){
+          // arm_amp *= 0.5;
+          angle_center = -30;
+        }
+      }else if (stick_y == 1 ){
+        if (type == BACK_LEFT || type == BACK_RIGHT){
+          // arm_amp *= 0.5;
+          angle_center = 15;
+        }else if(type == FRONT_LEFT || type == FRONT_RIGHT){
+          // arm_amp *= 0.5;
+          angle_center = 30;
+        }
+      }
+      int angle = arm_amp*sin(theta*PI/180 + phi*PI/180) + angle_center;
       setServoAngle(type, angle);
     }
     int waist_amp = 30;

@@ -26,6 +26,7 @@ void setupServo(){
     ESP32PWM::allocateTimer(1);
     ESP32PWM::allocateTimer(2);
     ESP32PWM::allocateTimer(3);
+    ESP32PWM::allocateTimer(4);
     const int minUs = 853;
     const int maxUs = 1997;
     for(int i = 0; i < SERVO_NUM; i++){
