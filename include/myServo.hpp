@@ -14,11 +14,11 @@ enum ServoType {
 
 #define SERVO_NUM 5
 #define M1 5
-#define M2 18
-#define M3 19
-#define M4 21
-#define M5 16
-const int servoPins[SERVO_NUM] = {M2, M1, M4, M3, M5};
+#define M2 1
+#define M3 6
+#define M4 3
+#define M5 10
+const int servoPins[SERVO_NUM] = {M1, M2, M4, M5, M3};
 Servo servos[SERVO_NUM];
 
 void setupServo(){

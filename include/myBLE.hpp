@@ -20,7 +20,7 @@ static boolean connected = false;
 static boolean doScan = false;
 static BLERemoteCharacteristic *pRemoteCharacteristic;
 static BLEAdvertisedDevice *myDevice;
-const int BLEConnectIndicatorLEDPin = 17;
+const int BLEConnectIndicatorLEDPin = 4;
 #define TARGET_DEVICE_NAME "VR-PARK"
 static int stick_x = 0;
 static int stick_y = 0;
